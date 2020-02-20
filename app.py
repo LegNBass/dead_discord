@@ -1,8 +1,15 @@
+import os
+
+from dotenv import load_dotenv
 from bot import LiveDead
 
 
 def main():
-    ld = LiveDead()
+    load_dotenv()
+
+    token = os.getenv('DISCORD_TOKEN')
+
+    ld = LiveDead(token)
     ld.run()
 
 
