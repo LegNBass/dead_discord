@@ -24,11 +24,16 @@ class LiveDead(discord.Client):
             return  # Never reply to myself
         for rule, response in self._message_rules:
             if result := rule(message):
-                await message.channel.send(
-                    embed=response(
-                        self, result
+                try:
+                    await message.channel.send(
+                        embed=response(
+                            self, result
+                        )
                     )
-                )
+                except Exception:
+                    await message.channel.send(
+                        "No Show found for that date."
+                    )
                 break
 
     def run(self):

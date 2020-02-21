@@ -36,7 +36,6 @@ class RelistenAPI:
             return response.status_code, response.json()
 
     def format_show(self, date):
-        print(f"Getting info on show: {date}")
         code, sources = self.show(date)
         if code == 200:
             url = sources['links'][0]['url']
