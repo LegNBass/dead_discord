@@ -1,14 +1,17 @@
 import re
 import discord
 
+from utils.relisten import RelistenAPI
+
 
 class LiveDead(discord.Client):
     _message_rules = (
-        (lambda message: re.match(r'\d{4}-\d{2}-\d{2}', message.content), lambda match: f"The date is {match.group()}"),
+        (lambda message: re.match(r'\d{4}-\d{2}-\d{2}', message.content.strip()), lambda self, match: self.relisten_api.format_show(match.group())),
     )
 
     def __init__(self, token):
         self.token = token
+        self.relisten_api = RelistenAPI()
         super().__init__()
 
     async def on_ready(self):
@@ -21,7 +24,12 @@ class LiveDead(discord.Client):
             return  # Never reply to myself
         for rule, response in self._message_rules:
             if result := rule(message):
-                await message.channel.send(response(result))
+                await message.channel.send(
+                    embed=response(
+                        self, result
+                    )
+                )
+                break
 
     def run(self):
         super().run(self.token)

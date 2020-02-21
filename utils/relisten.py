@@ -1,4 +1,5 @@
 import requests
+import discord
 
 
 class RelistenAPI:
@@ -28,11 +29,35 @@ class RelistenAPI:
                 source = next(iter(
                     response.json().get("sources", [])
                 ))
-                return source
+                return 200, source
             except StopIteration:
                 return []
         else:
-            return response.json()
+            return response.status_code, response.json()
+
+    def format_show(self, date):
+        print(f"Getting info on show: {date}")
+        code, sources = self.show(date)
+        if code == 200:
+            url = sources['links'][0]['url']
+            description = sources['description']
+
+            tracks = [
+                track for _set in sources['sets'] for track in _set['tracks']
+            ]
+            # print(tracks)
+            embed = discord.Embed(
+                title=date,
+                description=description,
+                url=url
+            )
+            for ix, track in enumerate(tracks, 1):
+                embed.add_field(
+                    name=ix,
+                    value=f"[{track['title']}]({track['mp3_url'].replace('mp3', 'shn').replace('download', 'details')})",
+                    inline=False
+                )
+            return embed
 
 
 if __name__ == "__main__":
@@ -51,7 +76,7 @@ if __name__ == "__main__":
     api = RelistenAPI()
     try:
         sys.stdout.write(
-            json.dumps(api.show(args.show))
+            json.dumps(api.show(args.show)[1])
         )
     except IOError:
         pass
